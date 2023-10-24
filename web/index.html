@@ -1,0 +1,81 @@
+<html >
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<meta charset="UTF-8">
+<body>
+<h1>Загрузить JSON файл и получить информацию о заказе</h1>
+<form id="upload-form">
+    <input type="file" id="json-file" name="json-file" accept=".json">
+    <button type="submit" id="upload-button">Загрузить</button>
+</form>
+<p id="upload-message"></p>
+<form id="order-form">
+    <label for="order-number">Введите номер заказа:</label>
+    <input type="text" id="order-number" name="order-number">
+    <button type="submit" id="order-button">Получить</button>
+</form>
+<p id="order-message"></p>
+<script>
+    // Функция для отправки JSON файла на бэкенд
+    function uploadFile(file) {
+        var formData = new FormData();
+        formData.append("file", file);
+        $.ajax({
+            url: "/upload", // URL бэкенда для загрузки файла
+            type: "POST",
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function (response) {
+                // Обработка успешного ответа от бэкенда
+                $("#upload-message").text("Файл успешно загружен");
+            },
+            error: function (error) {
+                // Обработка ошибки от бэкенда
+                $("#upload-message").text("Произошла ошибка при загрузке файла");
+            }
+        });
+    }
+
+    // Функция для получения информации о заказе по номеру
+    function getOrderInfo(number) {
+        $.ajax({
+            url: "/order", // URL бэкенда для получения информации о заказе
+            type: "GET",
+            data: {number: number},
+            success: function (response) {
+                // Обработка успешного ответа от бэкенда
+                $("#order-message").text("Информация о заказе: " + response);
+            },
+            error: function (error) {
+                // Обработка ошибки от бэкенда
+                $("#order-message").text("Произошла ошибка при получении информации о заказе");
+            }
+        });
+    }
+
+    // Обработчик события отправки формы загрузки файла
+    $("#upload-form").submit(function (event) {
+        event.preventDefault(); // Предотвращение действия по умолчанию
+        var file = $("#json-file")[0].files[0]; // Получение выбранного файла
+        if (file) {
+            uploadFile(file); // Вызов функции загрузки файла
+        } else {
+            $("#upload-message").text("Пожалуйста, выберите файл");
+        }
+    });
+
+    // Обработчик события отправки формы получения информации о заказе
+    $("#order-form").submit(function (event) {
+        event.preventDefault(); // Предотвращение действия по умолчанию
+        var number = $("#order-number").val(); // Получение введенного номера заказа
+        if (number) {
+            getOrderInfo(number); // Вызов функции получения информации о заказе
+        } else {
+            $("#order-message").text("Пожалуйста, введите номер заказа");
+        }
+    });
+</script>
+</body>
+</html>

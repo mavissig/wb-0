@@ -1,11 +1,11 @@
-<html >
+<!DOCTYPE html>
+<html>
 <head>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <meta charset="UTF-8">
 </head>
-<meta charset="UTF-8">
 <body>
 <h1>Загрузить JSON файл и получить информацию о заказе</h1>
-<form id="upload-form">
+<form id="upload-form" enctype="multipart/form-data">
     <input type="file" id="json-file" name="json-file" accept=".json">
     <button type="submit" id="upload-button">Загрузить</button>
 </form>
@@ -16,7 +16,50 @@
     <button type="submit" id="order-button">Получить</button>
 </form>
 <p id="order-message"></p>
+
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 <script>
+    document.getElementById('upload-form').addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        const formData = new FormData();
+        const fileInput = document.getElementById('json-file');
+        formData.append('file', fileInput.files[0]);
+
+        try {
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                try {
+                    const jsonData = JSON.parse(event.target.result);
+                    console.log('Файл JSON корректный:', jsonData);
+                } catch (error) {
+                    console.error('Ошибка разбора JSON:', error);
+                }
+            };
+            reader.readAsText(file);
+        } catch (error) {
+            console.error('Ошибка чтения файла:', error);
+        }
+
+        const backendUrl = '/upload';
+        try {
+            axios.post(backendUrl, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            })
+                .then(function (response) {
+                    document.getElementById('upload-message').textContent = 'Файл успешно загружен: ' + response.data;
+                })
+                .catch(function (error) {
+                    document.getElementById('upload-message').textContent = 'Ошибка при загрузке файла: ' + error.message;
+                    console.log(error);
+                });
+        } catch (error) {
+            console.log(error);
+        }
+    });
 
 </script>
 </body>

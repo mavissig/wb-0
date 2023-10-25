@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"io"
 	"log"
 	"net/http"
 	"os"
@@ -29,14 +28,15 @@ func index(w http.ResponseWriter, r *http.Request) {
 
 func upload(w http.ResponseWriter, r *http.Request) {
 	var order model.Order
-
-	bytes, err := io.ReadAll(r.Body)
-	if err != nil {
-		log.Println("read upload: ", err.Error())
-	}
-
-	err = json.Unmarshal(bytes, &order)
+	file, _, err := r.FormFile("file")
 	if err != nil {
 		log.Println(err)
+		return
+	}
+
+	err = json.NewDecoder(file).Decode(&order)
+	if err != nil {
+		log.Println(err)
+		return
 	}
 }

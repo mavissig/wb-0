@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"wb/internal/model"
+	"wb/pkg/nats"
 )
 
 func Registry() {
@@ -39,4 +40,14 @@ func upload(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		return
 	}
+
+	data, err := json.Marshal(order)
+	if err != nil {
+		log.Println("marshal error: ", err)
+	}
+
+	var natsSrv nats.Service
+	natsSrv.Connect("produce_upload")
+	natsSrv.Publish("uploadFile", data)
+	natsSrv.Close()
 }

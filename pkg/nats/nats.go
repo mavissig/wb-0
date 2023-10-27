@@ -10,42 +10,52 @@ type Service struct {
 	sub stan.Subscription
 }
 
-type Server struct {
-	ClusterID string
-	ClientID  string
-	Url       string
+type Consumer interface {
+	Consume(data []byte) error
 }
 
-func (srv *Server) Subscribe(subject string) (*Service, error) {
-	sc, err := stan.Connect(srv.ClusterID, srv.ClientID, stan.NatsURL(srv.Url))
+func (srv *Service) Connect(clientID string) error {
+	sc, err := stan.Connect("wb_cluster", clientID, stan.NatsURL("0.0.0.0:4222"))
 	if err != nil {
-		log.Fatal(err)
-		return nil, err
+		log.Println(clientID, "err: ", err)
+		return err
 	}
 
-	sub, err := sc.Subscribe(subject, func(m *stan.Msg) {
-		log.Printf("Received a message: %s\n", string(m.Data))
+	srv.sc = sc
+	return err
+}
+
+func (srv *Service) Subscribe(subject string, consumer Consumer) error {
+	sub, err := srv.sc.Subscribe(subject, func(m *stan.Msg) {
+		err := consumer.Consume(m.Data)
+		if err != nil {
+			log.Println(err)
+			return
+		}
 	})
 	if err != nil {
-		log.Fatal(err)
-		return nil, err
+		log.Println(err)
+		return err
 	}
-	s := Service{
-		sc:  sc,
-		sub: sub,
-	}
-	return &s, nil
+
+	srv.sub = sub
+	return nil
 }
 
-func (s *Service) Publish(subject string, data []byte) {
-	err := s.sc.Publish(subject, data)
+func (srv *Service) Publish(subject string, data []byte) {
+	err := srv.sc.Publish(subject, data)
 	if err != nil {
 		log.Println("error published: ", err)
 		return
 	}
 }
 
-func (s *Service) Close() {
-	_ = s.sc.Close()
-	_ = s.sub.Unsubscribe()
+func (srv *Service) Close() {
+	if srv.sc != nil {
+		_ = srv.sc.Close()
+	}
+	if srv.sub != nil {
+		_ = srv.sub.Unsubscribe()
+	}
+
 }

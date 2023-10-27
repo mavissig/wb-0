@@ -15,26 +15,26 @@ type Payment struct {
 	RequestID    string `json:"request_id"`
 	Currency     string `json:"currency"`
 	Provider     string `json:"provider"`
-	Amount       string `json:"amount"`
-	PaymentDt    string `json:"payment_dt"`
+	Amount       int    `json:"amount"`
+	PaymentDt    int    `json:"payment_dt"`
 	Bank         string `json:"bank"`
-	DeliveryCost string `json:"delivery_cost"`
-	GoodsTotal   string `json:"goods_total"`
-	CustomFee    string `json:"custom_fee"`
+	DeliveryCost int    `json:"delivery_cost"`
+	GoodsTotal   int    `json:"goods_total"`
+	CustomFee    int    `json:"custom_fee"`
 }
 
 type Item struct {
-	ChrtID      string `json:"chrt_id"`
+	ChrtID      int    `json:"chrt_id"`
 	TrackNumber string `json:"track_number"`
-	Price       string `json:"price"`
+	Price       int    `json:"price"`
 	Rid         string `json:"rid"`
 	Name        string `json:"name"`
-	Sale        string `json:"sale"`
+	Sale        int    `json:"sale"`
 	Size        string `json:"size"`
-	TotalPrice  string `json:"total_price"`
-	NmID        string `json:"nm_id"`
+	TotalPrice  int    `json:"total_price"`
+	NmID        int    `json:"nm_id"`
 	Brand       string `json:"brand"`
-	Status      string `json:"status"`
+	Status      int    `json:"status"`
 }
 
 type Order struct {
@@ -49,7 +49,7 @@ type Order struct {
 	CustomerID        string   `json:"customer_id"`
 	DeliveryService   string   `json:"delivery_service"`
 	ShardKey          string   `json:"shardkey"`
-	SMID              string   `json:"sm_id"`
+	SMID              int      `json:"sm_id"`
 	DateCreated       string   `json:"date_created"`
 	OofShard          string   `json:"oof_shard"`
 }

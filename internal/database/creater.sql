@@ -53,8 +53,13 @@ CREATE TABLE Items (
     total_price INT,
     nm_id INT,
     brand VARCHAR(255),
-    status INT,
+    status INT
+);
 
+CREATE TABLE OrderItems (
     order_uid VARCHAR(255),
-    FOREIGN KEY (order_uid) REFERENCES Orders(order_uid)
+    chrt_id INT,
+    FOREIGN KEY (order_uid) REFERENCES Orders(order_uid),
+    FOREIGN KEY (chrt_id) REFERENCES Items(chrt_id),
+    PRIMARY KEY (order_uid, chrt_id)
 );

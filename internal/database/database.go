@@ -134,8 +134,7 @@ VALUES (:order_uid, :transaction,:request_id,:currency,:provider,:amount,:paymen
 
 	query = `
 INSERT INTO items (
-                   chrt_id, 
-                   order_uid, 
+                   chrt_id,
                    track_number,
 				   price, 
                    rid, 
@@ -147,11 +146,14 @@ INSERT INTO items (
 				   brand, 
                    status
 )
-VALUES (:chrt_id,:order_uid,:track_number,:price,:rid,:name,:sale,:size,:total_price,:nm_id,:brand,:status)
+VALUES (:chrt_id,:track_number,:price,:rid,:name,:sale,:size,:total_price,:nm_id,:brand,:status)
 ON CONFLICT (chrt_id) DO NOTHING
 `
-	for _, item := range order.Items {
+	fmt.Println("[Items count]: ", len(order.Items))
 
+	for ind, item := range order.Items {
+
+		log.Printf("ind: %d | chrt_id: %d\n", ind, item.ChrtID)
 		itemWithOrderUID := struct {
 			OrderUID string `db:"order_uid"`
 			model.Item
@@ -161,6 +163,29 @@ ON CONFLICT (chrt_id) DO NOTHING
 		}
 
 		_, err := tx.NamedExecContext(context.Background(), query, itemWithOrderUID)
+		if err != nil {
+			fmt.Println("[ERROR Item]: ", err)
+			return err
+		}
+	}
+
+	query = `
+    INSERT INTO OrderItems (
+        order_uid,
+        chrt_id
+    )
+    VALUES (:order_uid, :chrt_id)
+    `
+	for _, item := range order.Items {
+		orderItem := struct {
+			OrderUID string `db:"order_uid"`
+			ChrtID   int    `db:"chrt_id"`
+		}{
+			order.OrderUID,
+			item.ChrtID,
+		}
+
+		_, err = tx.NamedExecContext(context.Background(), query, orderItem)
 		if err != nil {
 			return err
 		}
@@ -228,8 +253,10 @@ func (database *Database) GetAllOrders() (map[string]model.Order, error) {
     FROM Orders
     LEFT JOIN Delivery ON Orders.order_uid = Delivery.order_uid
     LEFT JOIN Payment ON Orders.order_uid = Payment.order_uid
-    LEFT JOIN Items ON Orders.order_uid = Items.order_uid;
-    `
+    LEFT JOIN OrderItems ON Orders.order_uid = OrderItems.order_uid
+    LEFT JOIN Items ON OrderItems.chrt_id = Items.chrt_id;
+`
+
 	err := database.db.Select(&temps, query)
 	if err != nil {
 		fmt.Println(err)

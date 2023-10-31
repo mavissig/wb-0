@@ -10,6 +10,7 @@
     <button type="submit" id="upload-button">Загрузить</button>
 </form>
 <p id="upload-message"></p>
+<div id="json-content"></div>
 <form id="order-form">
     <label for="order-number">Введите номер заказа:</label>
     <input type="text" id="order-number" name="order-number">
@@ -60,6 +61,48 @@
             console.log(error);
         }
     });
+
+    document.getElementById('order-form').addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        const orderNumber = document.getElementById('order-number').value;
+        const backendUrl = '/getOrder/' + orderNumber;
+
+        axios.get(backendUrl)
+            .then(function (response) {
+                const jsonData = response.data;
+                let jsonContent = document.getElementById('json-content');
+                jsonContent.innerHTML = '<h2>Содержимое JSON файла:</h2>';
+                jsonContent.innerHTML += jsonToHtml(jsonData);
+            })
+            .catch(function (error) {
+                document.getElementById('order-message').textContent = 'Ошибка при получении заказа: ' + error.message;
+                console.log(error);
+            });
+    });
+
+    function jsonToHtml(jsonData, indent = '') {
+        let htmlContent = '';
+        for (let key in jsonData) {
+            if (Array.isArray(jsonData[key])) {
+                htmlContent += `<p>${indent}<strong>${key}:</strong></p>`;
+                jsonData[key].forEach((item, index) => {
+                    if (typeof item === 'object' && item !== null) {
+                        htmlContent += `<p>${indent}    <strong>[${index}]</strong></p>`;
+                        htmlContent += jsonToHtml(item, indent + '        ');
+                    } else {
+                        htmlContent += `<p>${indent}    <strong>[${index}]</strong>: ${item}</p>`;
+                    }
+                });
+            } else if (typeof jsonData[key] === 'object' && jsonData[key] !== null) {
+                htmlContent += `<p>${indent}<strong>${key}:</strong></p>`;
+                htmlContent += jsonToHtml(jsonData[key], indent + '    ');
+            } else {
+                htmlContent += `<p>${indent}<strong>${key}:</strong> ${jsonData[key]}</p>`;
+            }
+        }
+        return htmlContent;
+    }
 
 </script>
 </body>

@@ -5,6 +5,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
+	"wb/internal/cache"
 	"wb/internal/model"
 	"wb/pkg/nats"
 )
@@ -12,6 +14,7 @@ import (
 func Registry() {
 	http.HandleFunc("/", index)
 	http.HandleFunc("/upload", upload)
+	http.HandleFunc("/getOrder/", getOrder)
 }
 
 func index(w http.ResponseWriter, r *http.Request) {
@@ -50,4 +53,21 @@ func upload(w http.ResponseWriter, r *http.Request) {
 	natsSrv.Connect("produce_upload")
 	natsSrv.Publish("uploadFile", data)
 	natsSrv.Close()
+}
+
+func getOrder(w http.ResponseWriter, r *http.Request) {
+	orderID := strings.TrimPrefix(r.URL.Path, "/getOrder/")
+
+	_cache := cache.GetCacheInstance()
+	order := _cache[orderID]
+
+	orderJSON, err := json.MarshalIndent(order, "", "  ")
+	if err != nil {
+		log.Println("marshal error: ", err)
+		http.Error(w, "Ошибка при форматировании заказа", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(orderJSON)
 }

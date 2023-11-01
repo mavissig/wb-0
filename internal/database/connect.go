@@ -16,7 +16,5 @@ func (database *Database) Connect() {
 		log.Fatal(err)
 	}
 
-	fmt.Println("Successfully connected!")
-
 	database.db = db
 }

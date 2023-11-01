@@ -2,7 +2,6 @@ package cache
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"sync"
 	"wb/internal/model"
@@ -20,7 +19,9 @@ func GetCacheInstance(params ...map[string]model.Order) TypeCache {
 		if len(params) > 0 && len(params[0]) != 0 {
 			cache__ = params[0]
 		}
-		fmt.Println(len(cache__))
+		log.Printf(""+
+			"Successful transfer of data from the database to the cache.\n"+
+			"Orders transferred: %d", len(cache__))
 	})
 	return cache__
 }
@@ -39,6 +40,5 @@ func (c TypeCache) Consume(data []byte) error {
 	cache = GetCacheInstance()
 	cache[order.OrderUID] = order
 
-	fmt.Println("[cache add]: ", order.OrderUID)
 	return nil
 }

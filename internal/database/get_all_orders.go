@@ -8,8 +8,6 @@ import (
 )
 
 func (database *Database) GetAllOrders() (map[string]model.Order, error) {
-	fmt.Println("GetAllOrders")
-
 	type Temp struct {
 		model.Order
 		model.Delivery
@@ -89,6 +87,5 @@ func (database *Database) GetAllOrders() (map[string]model.Order, error) {
 		order.Items = append(order.Items, temp.Item)
 	}
 
-	fmt.Println("[init OrderUID]: ", orderMap["testid"].OrderUID)
 	return orderMap, nil
 }

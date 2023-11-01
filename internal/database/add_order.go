@@ -4,9 +4,7 @@ import (
 	"context"
 	"fmt"
 	_ "github.com/jackc/pgx/v5/stdlib"
-	"github.com/jmoiron/sqlx"
 	_ "github.com/jmoiron/sqlx"
-	"log"
 	"wb/internal/model"
 )
 
@@ -16,12 +14,7 @@ func (database *Database) AddOrder(order model.Order) error {
 		return err
 	}
 
-	defer func(tx *sqlx.Tx) {
-		err := tx.Rollback()
-		if err != nil {
-			log.Println(err)
-		}
-	}(tx)
+	defer tx.Rollback()
 
 	query := `
 INSERT INTO orders (
@@ -147,11 +140,7 @@ INSERT INTO items (
 VALUES (:chrt_id,:track_number,:price,:rid,:name,:sale,:size,:total_price,:nm_id,:brand,:status)
 ON CONFLICT (chrt_id) DO NOTHING
 `
-	fmt.Println("[Items count]: ", len(order.Items))
-
-	for ind, item := range order.Items {
-
-		log.Printf("ind: %d | chrt_id: %d\n", ind, item.ChrtID)
+	for _, item := range order.Items {
 		itemWithOrderUID := struct {
 			OrderUID string `db:"order_uid"`
 			model.Item

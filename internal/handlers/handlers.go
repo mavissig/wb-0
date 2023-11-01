@@ -12,13 +12,13 @@ import (
 )
 
 func Registry() {
-	http.HandleFunc("/", index)
-	http.HandleFunc("/upload", upload)
-	http.HandleFunc("/getOrder/", getOrder)
+	http.HandleFunc("/", Index)
+	http.HandleFunc("/upload", Upload)
+	http.HandleFunc("/getOrder/", GetOrder)
 }
 
-func index(w http.ResponseWriter, r *http.Request) {
-	content, err := os.ReadFile("./web/index.html")
+func Index(w http.ResponseWriter, r *http.Request) {
+	content, err := os.ReadFile("./web/Index.html")
 	if err != nil {
 		w.Write([]byte(err.Error()))
 	}
@@ -30,7 +30,7 @@ func index(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func upload(w http.ResponseWriter, r *http.Request) {
+func Upload(w http.ResponseWriter, r *http.Request) {
 	var order model.Order
 	file, _, err := r.FormFile("file")
 	if err != nil {
@@ -55,8 +55,8 @@ func upload(w http.ResponseWriter, r *http.Request) {
 	natsSrv.Close()
 }
 
-func getOrder(w http.ResponseWriter, r *http.Request) {
-	orderID := strings.TrimPrefix(r.URL.Path, "/getOrder/")
+func GetOrder(w http.ResponseWriter, r *http.Request) {
+	orderID := strings.TrimPrefix(r.URL.Path, "/GetOrder/")
 
 	_cache := cache.GetCacheInstance()
 	order := _cache[orderID]

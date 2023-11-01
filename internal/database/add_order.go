@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/jmoiron/sqlx"
 	_ "github.com/jmoiron/sqlx"
 	"log"
 	"wb/internal/model"
@@ -15,7 +16,12 @@ func (database *Database) AddOrder(order model.Order) error {
 		return err
 	}
 
-	defer tx.Rollback()
+	defer func(tx *sqlx.Tx) {
+		err := tx.Rollback()
+		if err != nil {
+			log.Println(err)
+		}
+	}(tx)
 
 	query := `
 INSERT INTO orders (

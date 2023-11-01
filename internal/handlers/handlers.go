@@ -56,7 +56,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetOrder(w http.ResponseWriter, r *http.Request) {
-	orderID := strings.TrimPrefix(r.URL.Path, "/GetOrder/")
+	orderID := strings.TrimPrefix(r.URL.Path, "/getOrder/")
 
 	_cache := cache.GetCacheInstance()
 	order := _cache[orderID]
